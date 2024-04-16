@@ -5,7 +5,7 @@ import LoggedInBanner from '../../Layout/Banner/LoggedInBanner.jsx';
 import { LoggedInNavigation } from '../../Layout/LoggedInNavigation.jsx';
 import { JobSummaryCard } from './JobSummaryCard.jsx';
 import { BodyWrapper, loaderData } from '../../Layout/BodyWrapper.jsx';
-import { Pagination, Icon, Dropdown, Checkbox, Accordion, Form, Segment } from 'semantic-ui-react';
+import { Pagination, Icon, Dropdown, Checkbox, Accordion, Form, Segment, ButtonGroup, Button } from 'semantic-ui-react';
 
 export default class ManageJob extends React.Component {
     constructor(props) {
@@ -23,41 +23,283 @@ export default class ManageJob extends React.Component {
             },
             filter: {
                 showActive: true,
-                showClosed: false,
+                showClosed: true,//false,
                 showDraft: true,
                 showExpired: true,
-                showUnexpired: true
+                showUnexpired: true,
             },
             totalPages: 1,
-            activeIndex: ""
+            activeIndex: "",            
+            filterOptions: [    // States added by Sujan
+                {
+                    key: '0',
+                    text: 'Choose filter',
+                    value: 'Choose filter',
+                },
+                {
+                    key: '1',
+                    text: 'Active',
+                    value: 'Active',
+                },
+                {
+                    key: '2',
+                    text: 'Closed',
+                    value: 'Closed',
+                },
+                {
+                    key: '3',
+                    text: 'Draft',
+                    value: 'Draft',
+                },
+                {
+                    key: '4',
+                    text: 'Expired',
+                    value: 'Expired',
+                },
+                {
+                    key: '5',
+                    text: 'Unexpired',
+                    value: 'Unexpired',
+                }
+            ],
+            selectedFilterOption: 'Choose filter',
+            sortOptions: [  // States added by Sujan
+                {
+                    key: 'Newest first',
+                    value: 'desc',
+                    text: 'Newest First'
+                },
+                {
+                    key: 'Oldest first',
+                    value: 'asc',
+                    text: 'Oldest First'
+                }
+            ],            
+            jobEditState: false,
         }
         this.loadData = this.loadData.bind(this);
         this.init = this.init.bind(this);
         this.loadNewData = this.loadNewData.bind(this);
         //your functions go here
-    };
+        this.loadNextPage = this.loadNextPage.bind(this);
+        this.loadPrevPage = this.loadPrevPage.bind(this);
+        this.loadFirstPage = this.loadFirstPage.bind(this);
+        this.loadLastPage = this.loadLastPage.bind(this);
+        this.reloadCurrentpage = this.reloadCurrentpage.bind(this);
 
+        let currentpage = this.state.activePage;
+
+        this.JobEditWindow = this.JobEditWindow.bind(this);
+        this.SelectSort = this.SelectSort.bind(this);
+        this.SelectFilter = this.SelectFilter.bind(this);        
+    };
+    JobEditWindow() {
+        this.setState((prevState) => ({
+            jobEditState: !prevState.jobEditState
+        }), () => { console.log(`jobEditState: ${this.state.jobEditState}`)});
+        this.state.jobEditState
+    }
     init() {
+        
         let loaderData = TalentUtil.deepCopy(this.state.loaderData)
         loaderData.isLoading = false;
-        this.setState({ loaderData });//comment this
+        //this.setState({ loaderData: loaderData });//comment this
 
         //set loaderData.isLoading to false after getting data
         //this.loadData(() =>
         //    this.setState({ loaderData })
         //)
-        
+
         //console.log(this.state.loaderData)
+        
+        this.loadData(() => {
+            this.setState((
+                { loaderData: loaderData })
+            );
+            //this.setState((prevState) => ({
+            //    activePage: (prevState.activePage < prevState.totalPages) ? prevState.activePage + 1 : prevState.activePage
+            //}));
+        });
     }
 
     componentDidMount() {
         this.init();
     };
-
+    
+    loadFirstPage() {
+        this.setState(
+            { activePage: 1 },
+            () => {
+                this.loadData(() => { })
+            }
+        );        
+    }
+    loadPrevPage() {        
+        this.setState((prevState) => (
+            {
+                activePage: (prevState.activePage > 1) ?
+                    prevState.activePage - 1 :
+                    prevState.activePage
+            }),
+            () => {
+                this.loadData(() => { })
+            }
+        );        
+    }
+    loadNextPage() {
+        this.setState((prevState) => (
+            {
+                activePage: (prevState.activePage < prevState.totalPages) ?
+                    prevState.activePage + 1 :
+                    prevState.activePage
+            }),
+            () => {
+                this.loadData(() => { })
+            }
+        );        
+    }
+    loadLastPage() {
+        this.currentpage = this.state.totalPages;
+        this.setState(
+            { activePage: this.state.totalPages },
+            () => {
+                this.loadData(() => { })
+            }
+        );                
+    }
+    reloadCurrentpage() {
+        console.log('reload page...');
+        //this.loadData(() => { })
+    }
+    SelectSort(data) {
+        console.log(data);
+        this.setState({
+            sortBy: {
+                date: data.value
+            }
+        },
+        () => {
+            console.log(this.state.filter);
+            this.loadData(() => { })
+        });
+    }
+    SelectFilter(data) {
+        /*the filters respond but it shows data opposite of what it should be showing      */
+        this.setState((prevState) => ({
+            selectedFilterOption: data.value
+        }),
+            () => {
+                console.log(this.state.selectedFilterOption);
+            }
+        );
+        this.setState({
+            totalPages: 1
+        });
+        this.setState({
+            activePage: 1
+        });
+        switch (data.value) {
+            case 'Active':
+                this.setState((prevState) => (
+                    {
+                        filter: {
+                            showActive: false,
+                            showClosed: true,
+                            showDraft: true,
+                            showExpired: true,
+                            showUnexpired: true,
+                        }
+                    })
+                );
+                break;
+            case 'Closed':
+                this.setState((prevState) => (
+                    {
+                        filter: {
+                            showActive: true,
+                            showClosed: false,
+                            showDraft: true,
+                            showExpired: true,
+                            showUnexpired: true,
+                        }
+                    })
+                );
+                break;
+            case 'Draft':
+                this.setState((prevState) => (
+                    {
+                        filter: {
+                            showActive: true,
+                            showClosed: true,
+                            showDraft: false,
+                            showExpired: true,
+                            showUnexpired: true,
+                        }
+                    })
+                );
+                break;
+            case 'Expired':
+                this.setState((prevState) => (
+                    {
+                        filter: {
+                            showActive: true,
+                            showClosed: true,
+                            showDraft: true,
+                            showExpired: false,
+                            showUnexpired: true,
+                        }
+                    })
+                );
+                break;
+            case 'Unexpired':
+                this.setState((prevState) => (
+                    {
+                        filter: {
+                            showActive: true,
+                            showClosed: true,
+                            showDraft: true,
+                            showExpired: true,
+                            showUnexpired: false,
+                        }
+                    })
+                );
+                break;
+        }
+    }
+    
     loadData(callback) {
-        var link = 'http://localhost:51689/listing/listing/getSortedEmployerJobs';
+        callback();        
+        var link = 'http://localhost:51689/listing/listing/getSortedEmployerJobs?';
         var cookies = Cookies.get('talentAuthToken');
-       // your ajax call and other logic goes here
+        // your ajax call and other logic goes here
+        $.ajax({
+            url: link + `activePage=${this.state.activePage}` +//`activePage=${this.currentpage}` +
+                `&sortbyDate=${this.state.sortBy.date}` + 
+                `&showActive=${this.state.filter.showActive}` +
+                `&showClosed=${this.state.filter.showClosed}` +
+                `&showExpired=${this.state.filter.showExpired}` +
+                `&showUnexpired=${this.state.filter.showUnexpired}` +
+                `&limit=2`,
+            headers: {
+                'Authorization': 'Bearer ' + cookies,
+                'Content-Type': 'application/json'
+            },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (res) {
+                this.setState({ loadJobs: res.myJobs });
+                //console.log('AJAX Job response');
+                //console.log(res);
+                this.setState({
+                    totalPages: (res.totalCount % 2 === 0) ? res.totalCount / 2 : Math.ceil(res.totalCount / 2)
+                });
+                //console.log(`totalPages: ${this.state.totalPages}`);
+            }.bind(this),
+            error: function (res) {
+                //console.log(res.status)
+            }
+        });
     }
 
     loadNewData(data) {
@@ -77,7 +319,57 @@ export default class ManageJob extends React.Component {
     render() {
         return (
             <BodyWrapper reload={this.init} loaderData={this.state.loaderData}>
-               <div className ="ui container">Your table goes here</div>
+                <div className="ui container">                    
+                    <h3><b>List of Jobs</b></h3>
+                    <span>
+                        <Icon name='filter' />Filter:{' '}
+                        <Dropdown inline
+                            options={this.state.filterOptions}
+                            value={this.state.selectedFilterOption}
+                            onChange={(e,data) => this.SelectFilter(data) } />
+                        <Icon name='calendar' />Sort by date:{' '}
+                        <Dropdown inline
+                            value={this.state.sortBy.date}
+                            onChange={(e, data) => this.SelectSort(data)}
+                            options={this.state.sortOptions} />
+                    </span>
+                    <div className="row">
+                        <div className="ui grid">
+                            <div className="row">                            
+                                {this.state.loadJobs.map((job) =>
+                                    (<div className="eight wide column">
+                                    <JobSummaryCard key={job.id} job={job} />
+                                    </div>
+                                ))}                                
+                            </div>
+                        </div>
+                    </div>
+
+                    <br />
+                    <div className="ui grid">
+                        <div className="sixteen wide center aligned column">
+                            <ButtonGroup>
+                                <Button basic color='black' onClick={this.loadFirstPage}>
+                                    &lt;&lt;
+                                </Button>
+                                <Button basic color='black' onClick={this.loadPrevPage}>
+                                    &lt;
+                                </Button>
+                                <Button type="button">
+                                    {this.state.activePage}
+                                </Button>
+                                <Button basic color='black' onClick={this.loadNextPage}>
+                                    &gt;
+                                </Button>
+                                <Button basic color='black' onClick={this.loadLastPage}>
+                                    &gt;&gt;
+                                </Button>
+                            </ButtonGroup>
+                        </div>
+                    </div>
+                    <br />
+                    {/*Your table goes here*/}
+                </div>
             </BodyWrapper>
         )
     }
