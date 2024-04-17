@@ -3,6 +3,7 @@ import Cookies from 'js-cookie';
 import { Popup, Button, ButtonGroup, Card, CardContent, CardHeader, CardMeta, CardDescription, Label, Icon } from 'semantic-ui-react';
 import moment from 'moment';
 import { Link } from "react-router-dom";
+import JobCloseRender from './JobCloseRender.jsx';
 
 export class JobSummaryCard extends React.Component {
     constructor(props) {
@@ -17,6 +18,7 @@ export class JobSummaryCard extends React.Component {
         this.editJob = this.editJob.bind(this);
         this.closeJob = this.closeJob.bind(this);
         this.testJobExpiry = this.testJobExpiry.bind(this);
+        this.testJobClosed = this.testJobClosed.bind(this);        
     }
 
     componentDidMount() {
@@ -24,6 +26,7 @@ export class JobSummaryCard extends React.Component {
     }
 
     jobInit() {
+        console.log(this.state.job);
         //const test = this.testJobExpiry() ? "Expired" : "Not Expired";
         //console.log(test);
     }
@@ -33,7 +36,14 @@ export class JobSummaryCard extends React.Component {
         if (new Date().setHours(0, 0, 0, 0) > new Date(this.state.job.expiryDate).setHours(0, 0, 0, 0)) { return true; }
         return false;
     }
-
+    testJobClosed() {
+        if (this.state.job.status === 1) {
+            console.log("Job Closed.");
+        } else {
+            console.log("Job Open.");
+        }
+    }
+    
     selectJob(id) {
         var cookies = Cookies.get('talentAuthToken');
         //url: 'http://localhost:51689/listing/listing/closeJob',
@@ -49,8 +59,15 @@ export class JobSummaryCard extends React.Component {
             data: JSON.stringify(id),
             success: function (res) {
                 this.setState({ loadJobs: res.myJobs });
-                //console.log('AJAX Job Close Response');
-                //console.log(res);
+                console.log('AJAX Job Close Response');
+                console.log(res);
+                this.setState(prevState => {
+                    let updatestate = Object.assign({}, prevState);   // creating copy of state variable job
+                    updatestate.job.status = 1;                               // update the status property,
+                    return { updatestate };                               // return new object updateJob
+                },
+                    () => { console.log(this.state.job); }
+                )
             }.bind(this),
             error: function (res) {
                 console.log(res.status)
@@ -75,6 +92,7 @@ export class JobSummaryCard extends React.Component {
         const city = this.state.job.location.city;
         let jobExpiry = this.testJobExpiry() ? (<Button color="red" content="Expired" />) : (<Button content="Not Expired" />);
         let linkString = "/EditJob/" + this.state.job.id;
+        
         return (
             //<div class="card ten wide columns ui">
             /*this.state.jobEditState ? <div>This is job edit window</div>: (*/
@@ -103,13 +121,24 @@ export class JobSummaryCard extends React.Component {
                         {jobExpiry}
                     </ButtonGroup>
                     <ButtonGroup floated="right">
-                        <Button basic color="blue" icon="cancel" content="Close" onClick={this.closeJob} />
-                        {/*<Button basic color="blue" icon="edit" content="Edit" onClick={() => { console.log(`edit string: ${linkString}`) }} />*/}
+                        <JobCloseRender
+                            closeStatus={this.state.job.status}
+                            jobCloseClick={this.closeJob}
+                        />
                         <Link to={linkString} >
-                            <Button basic color="blue" icon="edit" content="Edit" onClick={this.editJob} />
+                            <Button
+                                basic color="blue"
+                                icon="edit"
+                                content="Edit"
+                                onClick={this.editJob}
+                            />
                         </Link>
-                        <Button basic color="blue" icon="copy" content="Copy" />
-                    </ButtonGroup>
+                        <Button
+                            basic color="blue"
+                            icon="copy"
+                            content="Copy"
+                        />
+                    </ButtonGroup>                    
                 </CardContent>
             </Card>
             //)
