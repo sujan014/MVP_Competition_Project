@@ -6,6 +6,7 @@ import { LoggedInNavigation } from '../../Layout/LoggedInNavigation.jsx';
 import { JobSummaryCard } from './JobSummaryCard.jsx';
 import { BodyWrapper, loaderData } from '../../Layout/BodyWrapper.jsx';
 import { Pagination, Icon, Dropdown, Checkbox, Accordion, Form, Segment, ButtonGroup, Button } from 'semantic-ui-react';
+import axios from 'axios';
 
 export default class ManageJob extends React.Component {
     constructor(props) {
@@ -91,7 +92,8 @@ export default class ManageJob extends React.Component {
 
         this.JobEditWindow = this.JobEditWindow.bind(this);
         this.SelectSort = this.SelectSort.bind(this);
-        this.SelectFilter = this.SelectFilter.bind(this);        
+        this.SelectFilter = this.SelectFilter.bind(this);
+        this.handleFilterState = this.handleFilterState.bind(this);
     };
     JobEditWindow() {
         this.setState((prevState) => ({
@@ -102,23 +104,12 @@ export default class ManageJob extends React.Component {
     init() {
         
         let loaderData = TalentUtil.deepCopy(this.state.loaderData)
-        loaderData.isLoading = false;
-        //this.setState({ loaderData: loaderData });//comment this
-
-        //set loaderData.isLoading to false after getting data
-        //this.loadData(() =>
-        //    this.setState({ loaderData })
-        //)
-
-        //console.log(this.state.loaderData)
+        loaderData.isLoading = false;        
         
         this.loadData(() => {
             this.setState((
                 { loaderData: loaderData })
-            );
-            //this.setState((prevState) => ({
-            //    activePage: (prevState.activePage < prevState.totalPages) ? prevState.activePage + 1 : prevState.activePage
-            //}));
+            );            
         });
     }
 
@@ -168,8 +159,7 @@ export default class ManageJob extends React.Component {
         );                
     }
     reloadCurrentpage() {
-        console.log('reload page...');
-        //this.loadData(() => { })
+        console.log('reload page...');        
     }
     SelectSort(data) {
         console.log(data);
@@ -183,86 +173,30 @@ export default class ManageJob extends React.Component {
             this.loadData(() => { })
         });
     }
+    
+    handleFilterState(dataValue) {
+        this.setState((
+            {                
+                selectedFilterOption: dataValue
+            }            
+        ));
+    }
     SelectFilter(data) {
-        /*the filters respond but it shows data opposite of what it should be showing      */
-        this.setState((prevState) => ({
-            selectedFilterOption: data.value
-        }),
-            () => {
-                console.log(this.state.selectedFilterOption);
-            }
-        );
-        this.setState({
-            totalPages: 1
-        });
-        this.setState({
-            activePage: 1
-        });
         switch (data.value) {
             case 'Active':
-                this.setState((prevState) => (
-                    {
-                        filter: {
-                            showActive: false,
-                            showClosed: true,
-                            showDraft: true,
-                            showExpired: true,
-                            showUnexpired: true,
-                        }
-                    })
-                );
+                this.handleFilterState(data.value);
                 break;
             case 'Closed':
-                this.setState((prevState) => (
-                    {
-                        filter: {
-                            showActive: true,
-                            showClosed: false,
-                            showDraft: true,
-                            showExpired: true,
-                            showUnexpired: true,
-                        }
-                    })
-                );
+                this.handleFilterState(data.value);
                 break;
             case 'Draft':
-                this.setState((prevState) => (
-                    {
-                        filter: {
-                            showActive: true,
-                            showClosed: true,
-                            showDraft: false,
-                            showExpired: true,
-                            showUnexpired: true,
-                        }
-                    })
-                );
+                this.handleFilterState(data.value);
                 break;
             case 'Expired':
-                this.setState((prevState) => (
-                    {
-                        filter: {
-                            showActive: true,
-                            showClosed: true,
-                            showDraft: true,
-                            showExpired: false,
-                            showUnexpired: true,
-                        }
-                    })
-                );
+                this.handleFilterState(data.value);
                 break;
             case 'Unexpired':
-                this.setState((prevState) => (
-                    {
-                        filter: {
-                            showActive: true,
-                            showClosed: true,
-                            showDraft: true,
-                            showExpired: true,
-                            showUnexpired: false,
-                        }
-                    })
-                );
+                this.handleFilterState(data.value);
                 break;
         }
     }
@@ -271,35 +205,44 @@ export default class ManageJob extends React.Component {
         callback();        
         var link = 'http://localhost:51689/listing/listing/getSortedEmployerJobs?';
         var cookies = Cookies.get('talentAuthToken');
-        // your ajax call and other logic goes here
-        $.ajax({
-            url: link + `activePage=${this.state.activePage}` +//`activePage=${this.currentpage}` +
-                `&sortbyDate=${this.state.sortBy.date}` + 
-                `&showActive=${this.state.filter.showActive}` +
-                `&showClosed=${this.state.filter.showClosed}` +
-                `&showExpired=${this.state.filter.showExpired}` +
-                `&showUnexpired=${this.state.filter.showUnexpired}` +
-                `&limit=2`,
+
+        const jobsURL = link + `activePage=${this.state.activePage}` +//`activePage=${this.currentpage}` +
+            `&sortbyDate=${this.state.sortBy.date}` +
+            `&showActive=${this.state.filter.showActive}` +
+            `&showClosed=${this.state.filter.showClosed}` +
+            `&showExpired=${this.state.filter.showExpired}` +
+            `&showUnexpired=${this.state.filter.showUnexpired}` +
+            `&limit=2`;
+        const headerField = {
             headers: {
                 'Authorization': 'Bearer ' + cookies,
                 'Content-Type': 'application/json'
-            },
-            type: "GET",
-            contentType: "application/json",
-            dataType: "json",
-            success: function (res) {
-                this.setState({ loadJobs: res.myJobs });
-                //console.log('AJAX Job response');
-                //console.log(res);
-                this.setState({
-                    totalPages: (res.totalCount % 2 === 0) ? res.totalCount / 2 : Math.ceil(res.totalCount / 2)
-                });
-                //console.log(`totalPages: ${this.state.totalPages}`);
-            }.bind(this),
-            error: function (res) {
-                //console.log(res.status)
             }
-        });
+        };        
+
+        axios
+            .get(
+                jobsURL,
+                headerField
+            )
+            .then((response) => {
+                console.log(response);
+                if (response.status == 200) {
+                    console.log(response.data.myJobs);
+                    console.log(response.data.totalCount);
+                    var myJobs = response.data.myJobs;
+                    var totalCount = response.data.totalCount;
+                    this.setState((
+                        {
+                            loadJobs: myJobs,
+                            totalPages: (totalCount % 2 === 0) ? totalCount / 2 : Math.ceil(totalCount / 2)
+                        }
+                    ));                                        
+                }
+            })
+            .catch((error) => {
+                console.log(error);                
+            });
     }
 
     loadNewData(data) {
@@ -326,7 +269,7 @@ export default class ManageJob extends React.Component {
                         <Dropdown inline
                             options={this.state.filterOptions}
                             value={this.state.selectedFilterOption}
-                            onChange={(e,data) => this.SelectFilter(data) } />
+                            onChange={(e, data) => this.handleFilterState(data.value)} />
                         <Icon name='calendar' />Sort by date:{' '}
                         <Dropdown inline
                             value={this.state.sortBy.date}
