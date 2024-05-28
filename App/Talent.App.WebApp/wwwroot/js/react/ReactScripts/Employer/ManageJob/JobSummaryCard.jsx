@@ -17,28 +17,18 @@ export class JobSummaryCard extends React.Component {
             job: getJob,
             jobEditState: false
         };
-        this.jobInit = this.jobInit.bind(this);
-        this.editJob = this.editJob.bind(this);
+        
         this.closeJob = this.closeJob.bind(this);
         this.JobExpiry = this.JobExpiry.bind(this);
-        this.JobClosed = this.JobClosed.bind(this);
-        this.handleClick = this.handleClick.bind(this);
+        this.JobClosed = this.JobClosed.bind(this);        
     }
 
     componentDidMount() {
-        this.jobInit()
-    }
-    handleClick(){
-        //CloseJobService(this.state.job.id);
-    }
-    jobInit(){
-        console.log(this.state.job);
-        //const test = this.testJobExpiry() ? "Expired" : "Not Expired";
-        //console.log(test);
-    }
+        
+    }    
+    
     JobExpiry() {
-        // return true if expired
-        // return false if not expired        
+        // return true if expired, false if not expired        
         if (new Date().setHours(0, 0, 0, 0) > new Date(this.state.job.expiryDate).setHours(0, 0, 0, 0)) { return true; }
         return false;
     }
@@ -48,17 +38,14 @@ export class JobSummaryCard extends React.Component {
         } else {
             console.log("Job Open.");
         }
-    }        
-    editJob() {
-    }
-    closeJob() {
-        //this.selectJob(this.state.job.id);
+    }            
+    closeJob() {        
         const jobCloseStatus = CloseJobService(this.state.job.id);
         if (jobCloseStatus) {
             this.setState((prevState) => {
-                let updatestate = Object.assign({}, prevState);   // creating copy of state variable job
-                updatestate.job.status = 1;                               // update the status property,
-                return { updatestate };                               // return new object updateJob
+                let updatestate = Object.assign({}, prevState);         // creating copy of state variable job
+                updatestate.job.status = 1;                             // update the status property,
+                return { updatestate };                                 // return new object updateJob
             })
         }
     }
@@ -103,8 +90,7 @@ export class JobSummaryCard extends React.Component {
                             <Button
                                 basic color="blue"
                                 icon="edit"
-                                content="Edit"
-                                onClick={this.editJob}
+                                content="Edit"                                
                             />
                         </Link>
                         <Button

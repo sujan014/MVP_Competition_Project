@@ -14,7 +14,7 @@ export default class ManageJob extends React.Component {
         let loader = loaderData
         loader.allowedUsers.push("Employer");
         loader.allowedUsers.push("Recruiter");
-        //console.log(loader)
+        
         this.state = {
             loadJobs: [],
             loaderData: loader,
@@ -80,8 +80,7 @@ export default class ManageJob extends React.Component {
         }
         this.loadData = this.loadData.bind(this);
         this.init = this.init.bind(this);
-        this.loadNewData = this.loadNewData.bind(this);
-        //your functions go here
+                
         this.loadNextPage = this.loadNextPage.bind(this);
         this.loadPrevPage = this.loadPrevPage.bind(this);
         this.loadFirstPage = this.loadFirstPage.bind(this);
@@ -161,17 +160,17 @@ export default class ManageJob extends React.Component {
     reloadCurrentpage() {
         console.log('reload page...');        
     }
-    SelectSort(data) {
-        console.log(data);
-        this.setState({
-            sortBy: {
-                date: data.value
+    SelectSort(data) {        
+        this.setState(
+            {
+                sortBy: {
+                    date: data.value
+                }
+            },
+            () => {                
+                this.loadData(() => { })
             }
-        },
-        () => {
-            console.log(this.state.filter);
-            this.loadData(() => { })
-        });
+        );
     }
     
     handleFilterState(dataValue) {
@@ -206,7 +205,7 @@ export default class ManageJob extends React.Component {
         var link = 'http://localhost:51689/listing/listing/getSortedEmployerJobs?';
         var cookies = Cookies.get('talentAuthToken');
 
-        const jobsURL = link + `activePage=${this.state.activePage}` +//`activePage=${this.currentpage}` +
+        const jobsURL = link + `activePage=${this.state.activePage}` +
             `&sortbyDate=${this.state.sortBy.date}` +
             `&showActive=${this.state.filter.showActive}` +
             `&showClosed=${this.state.filter.showClosed}` +
@@ -225,11 +224,8 @@ export default class ManageJob extends React.Component {
                 jobsURL,
                 headerField
             )
-            .then((response) => {
-                console.log(response);
-                if (response.status == 200) {
-                    console.log(response.data.myJobs);
-                    console.log(response.data.totalCount);
+            .then((response) => {                
+                if (response.status == 200) {                    
                     var myJobs = response.data.myJobs;
                     var totalCount = response.data.totalCount;
                     this.setState((
@@ -243,21 +239,7 @@ export default class ManageJob extends React.Component {
             .catch((error) => {
                 console.log(error);                
             });
-    }
-
-    loadNewData(data) {
-        var loader = this.state.loaderData;
-        loader.isLoading = true;
-        data[loaderData] = loader;
-        this.setState(data, () => {
-            this.loadData(() => {
-                loader.isLoading = false;
-                this.setState({
-                    loadData: loader
-                })
-            })
-        });
-    }
+    }    
 
     render() {
         return (
@@ -280,9 +262,14 @@ export default class ManageJob extends React.Component {
                         <div className="ui grid">
                             <div className="row">                            
                                 {this.state.loadJobs.map((job) =>
-                                    (<div className="eight wide column">
-                                    <JobSummaryCard key={job.id} job={job} />
+                                (
+                                    <div
+                                        className="eight wide column"
+                                        key={job.id}
+                                    >
+                                        <JobSummaryCard job={job} />
                                     </div>
+
                                 ))}                                
                             </div>
                         </div>
@@ -310,8 +297,7 @@ export default class ManageJob extends React.Component {
                             </ButtonGroup>
                         </div>
                     </div>
-                    <br />
-                    {/*Your table goes here*/}
+                    <br />                    
                 </div>
             </BodyWrapper>
         )
