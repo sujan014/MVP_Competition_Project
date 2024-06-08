@@ -202,7 +202,8 @@ export default class ManageJob extends React.Component {
     
     loadData(callback) {
         callback();        
-        var link = 'http://localhost:51689/listing/listing/getSortedEmployerJobs?';
+        /*var link = 'http://localhost:51689/listing/listing/getSortedEmployerJobs?';*/
+        var link = 'https://talentmain1.azurewebsites.net/listing/listing/getSortedEmployerJobs?';
         var cookies = Cookies.get('talentAuthToken');
 
         const jobsURL = link + `activePage=${this.state.activePage}` +

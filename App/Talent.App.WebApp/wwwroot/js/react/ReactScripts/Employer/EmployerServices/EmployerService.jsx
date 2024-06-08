@@ -6,11 +6,11 @@ import 'regenerator-runtime/runtime';
 
 const CloseJobService = (id_to_close) => {
     if (id_to_close === '' || id_to_close === undefined)
-        return;
-    console.log("id to close : " + id_to_close);
+        return;    
     let cookies = Cookies.get('talentAuthToken');
-    console.log("cookies : " + cookies);
-    const link = 'http://localhost:51689/listing/listing/closeJob';
+    //console.log("cookies : " + cookies);
+    /*const link = 'http://localhost:51689/listing/listing/closeJob';*/
+    const link = '	https://talentmain1.azurewebsites.net/listing/listing/closeJob';
     const idField = id_to_close;
     const headerField = {
         headers: {
