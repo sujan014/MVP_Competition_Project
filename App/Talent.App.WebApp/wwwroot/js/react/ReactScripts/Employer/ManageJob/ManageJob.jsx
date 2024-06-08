@@ -89,12 +89,12 @@ export default class ManageJob extends React.Component {
 
         let currentpage = this.state.activePage;
 
-        this.JobEditWindow = this.JobEditWindow.bind(this);
-        this.SelectSort = this.SelectSort.bind(this);
-        this.SelectFilter = this.SelectFilter.bind(this);
+        this.jobEditWindow = this.jobEditWindow.bind(this);
+        this.selectSort = this.selectSort.bind(this);
+        this.selectFilter = this.selectFilter.bind(this);
         this.handleFilterState = this.handleFilterState.bind(this);
     };
-    JobEditWindow() {
+    jobEditWindow() {
         this.setState((prevState) => ({
             jobEditState: !prevState.jobEditState
         }), () => { console.log(`jobEditState: ${this.state.jobEditState}`)});
@@ -160,7 +160,7 @@ export default class ManageJob extends React.Component {
     reloadCurrentpage() {
         console.log('reload page...');        
     }
-    SelectSort(data) {        
+    selectSort(data) {        
         this.setState(
             {
                 sortBy: {
@@ -180,7 +180,7 @@ export default class ManageJob extends React.Component {
             }            
         ));
     }
-    SelectFilter(data) {
+    selectFilter(data) {
         switch (data.value) {
             case 'Active':
                 this.handleFilterState(data.value);
@@ -256,7 +256,7 @@ export default class ManageJob extends React.Component {
                         <Icon name='calendar' />Sort by date:{' '}
                         <Dropdown inline
                             value={this.state.sortBy.date}
-                            onChange={(e, data) => this.SelectSort(data)}
+                            onChange={(e, data) => this.selectSort(data)}
                             options={this.state.sortOptions} />
                     </span>
                     <div className="row">

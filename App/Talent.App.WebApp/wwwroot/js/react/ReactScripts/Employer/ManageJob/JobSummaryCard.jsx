@@ -19,26 +19,26 @@ export class JobSummaryCard extends React.Component {
         };
         
         this.closeJob = this.closeJob.bind(this);
-        this.JobExpiry = this.JobExpiry.bind(this);
-        this.JobClosed = this.JobClosed.bind(this);        
+        this.checkJobExpiry = this.checkJobExpiry.bind(this);
+        //this.checkJobClosed = this.checkJobClosed.bind(this);        
     }
 
     componentDidMount() {
         
     }    
     
-    JobExpiry() {
+    checkJobExpiry() {
         // return true if expired, false if not expired        
         if (new Date().setHours(0, 0, 0, 0) > new Date(this.state.job.expiryDate).setHours(0, 0, 0, 0)) { return true; }
         return false;
     }
-    JobClosed() {
+    /*checkJobClosed() {
         if (this.state.job.status === 1) {
             console.log("Job Closed.");
         } else {
             console.log("Job Open.");
         }
-    }            
+    }*/
     closeJob() {        
         const jobCloseStatus = CloseJobService(this.state.job.id);
         if (jobCloseStatus) {
@@ -54,7 +54,7 @@ export class JobSummaryCard extends React.Component {
         const summary = this.state.job.summary;
         const country = this.state.job.location.country;
         const city = this.state.job.location.city;
-        let jobExpiry = this.JobExpiry() ? (<Button color="red" content="Expired" />) : (<Button content="Not Expired" />);
+        let jobExpiry = this.checkJobExpiry() ? (<Button color="red" content="Expired" />) : (<Button content="Not Expired" />);
         let linkString = "/EditJob/" + this.state.job.id;
         
         return (            
